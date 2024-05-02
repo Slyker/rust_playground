@@ -41,7 +41,7 @@ impl Benchmark {
         self.average = Some(
             self.results
                 .iter()
-                .fold(std::time::Duration::new(0, 0), |acc, &x| acc + x)
+                .sum::<std::time::Duration>()
                 / self.iterations,
         );
         if self.print_result {

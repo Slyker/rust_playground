@@ -1,8 +1,5 @@
 #[allow(dead_code)]
-pub fn bench_closure<F>(mut closure: F) -> std::time::Duration
-where
-    F: FnMut(),
-{
+pub fn bench_closure<F>(mut closure: F) -> std::time::Duration where F: FnMut() {
     let start = std::time::Instant::now();
     closure();
     start.elapsed()
@@ -12,7 +9,7 @@ pub struct Benchmark {
     iterations: u32,
     name: String,
     results: Vec<std::time::Duration>,
-    average: Option<std::time::Duration>,
+    average: std::time::Duration,
     print_result: bool,
 }
 
@@ -22,15 +19,12 @@ impl Benchmark {
             iterations,
             name: name.to_string(),
             results: Vec::new(),
-            average: None,
+            average: std::time::Duration::new(0, 0),
             print_result: print,
         }
     }
 
-    pub fn run<F>(&mut self, mut closure: F)
-    where
-        F: FnMut(u32),
-    {
+    pub fn run<F>(&mut self, mut closure: F) where F: FnMut(u32) {
         println!("Running benchmark: {}(x{})", self.name, self.iterations);
         for i in 0..self.iterations {
             let start = std::time::Instant::now();
@@ -38,12 +32,9 @@ impl Benchmark {
 
             self.results.push(start.elapsed());
         }
-        self.average = Some(
-            self.results
-                .iter()
-                .fold(std::time::Duration::new(0, 0), |acc, &x| acc + x)
-                / self.iterations,
-        );
+        self.average =
+            self.results.iter().fold(std::time::Duration::new(0, 0), |acc, &x| acc + x) /
+            self.iterations;
         if self.print_result {
             self.print();
         }

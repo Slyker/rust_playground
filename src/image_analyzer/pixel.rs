@@ -8,25 +8,20 @@ pub struct Pixel {
     pub color: Color,
     pub points: Vec<Point>,
 }
-
-impl Pixel {
-    pub fn extend(&mut self, other: &Pixel) {
-        self.points.extend(other.points.iter().cloned());
-    }
-}
-
-pub type PixelVec = Vec<Pixel>;
-pub struct _PixelVec {
+pub struct PixelVec {
     pub pixels: Vec<Pixel>,
     pub points_count: usize,
 }
 
-impl _PixelVec {
+impl PixelVec {
     pub fn new() -> Self {
-        Self { pixels: Vec::new(), points_count: 0 }
+        Self {
+            pixels: Vec::new(),
+            points_count: 0,
+        }
     }
 
-    pub fn push(&mut self, (color,point): (Color, Point)) {
+    pub fn push(&mut self, (color, point): (Color, Point)) {
         self.points_count += 1;
         if let Some(pixel) = self.pixels.iter_mut().find(|pixel| pixel.color == color) {
             pixel.points.push(point);

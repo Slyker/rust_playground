@@ -7,14 +7,20 @@ pub struct Zone {
     pub end: Point,
     pub size: f64,
 }
+#[allow(dead_code)]
 
 impl Zone {
     pub fn new(start: Point, end: Point) -> Self {
-        let mut zone = Self { start, end, size: 0.0 };
+        let mut zone = Self {
+            start,
+            end,
+            size: 0.0,
+        };
         zone.size = zone.start.distance(&zone.end);
         zone
     }
 }
+#[allow(dead_code)]
 
 impl Zone {
     pub fn area(&self, max_x: u32, max_y: u32) -> (u32, u32, u32, u32) {
@@ -84,10 +90,15 @@ pub struct ZoneManager {
     width: u32,
     height: u32,
 }
+#[allow(dead_code)]
 
 impl ZoneManager {
     pub fn new(width: u32, height: u32) -> Self {
-        Self { zones: Vec::new(), width, height }
+        Self {
+            zones: Vec::new(),
+            width,
+            height,
+        }
     }
 
     pub fn add_zone(&mut self, zone: Zone) {
@@ -98,7 +109,7 @@ impl ZoneManager {
     }
 
     pub fn extend_zones(&mut self) {
-        let mut zones = self.zones.clone();
+        let zones = self.zones.clone();
         self.zones.clear();
         for mut zone in zones {
             let mut found = false;
@@ -198,7 +209,5 @@ mod tests {
         zone_manager.extend_zones();
 
         assert_eq!(zone_manager.zones.len(), 1);
-       
-
     }
 }

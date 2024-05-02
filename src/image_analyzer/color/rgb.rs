@@ -1,4 +1,4 @@
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 
 use super::hsv::Hsv;
 
@@ -13,23 +13,29 @@ pub struct Rgb {
 impl Rgb {
     pub fn diff(&self, other: &Rgb) -> Rgb {
         Rgb {
-            r: (self.r as i16 - other.r as i16).abs() as u8,
-            g: (self.g as i16 - other.g as i16).abs() as u8,
-            b: (self.b as i16 - other.b as i16).abs() as u8,
-            a: (self.a as i16 - other.a as i16).abs() as u8,
+            r: ((self.r as i16) - (other.r as i16)).abs() as u8,
+            g: ((self.g as i16) - (other.g as i16)).abs() as u8,
+            b: ((self.b as i16) - (other.b as i16)).abs() as u8,
+            a: ((self.a as i16) - (other.a as i16)).abs() as u8,
         }
     }
 
     pub fn compare(&self, other: &Rgb, tolerance: Rgb) -> bool {
         let diff = self.diff(other);
-        diff.r <= tolerance.r && diff.g <= tolerance.g && diff.b <= tolerance.b && diff.a <= tolerance.a
+        diff.r <= tolerance.r
+            && diff.g <= tolerance.g
+            && diff.b <= tolerance.b
+            && diff.a <= tolerance.a
     }
-
+    #[allow(dead_code)]
     pub fn compare_from_hsv(&self, other: &Hsv, tolerance: Rgb) -> bool {
         let diff = self.diff(&Rgb::from(other));
-        diff.r <= tolerance.r && diff.g <= tolerance.g && diff.b <= tolerance.b && diff.a <= tolerance.a
+        diff.r <= tolerance.r
+            && diff.g <= tolerance.g
+            && diff.b <= tolerance.b
+            && diff.a <= tolerance.a
     }
-
+    #[allow(dead_code)]
     pub fn compare_to_hsv(&self, other: &Hsv, tolerance: Hsv) -> bool {
         let hsv = Hsv::from(self);
         hsv.compare(other, tolerance)
@@ -59,4 +65,3 @@ impl From<[u8; 4]> for Rgb {
         rgb
     }
 }
-

@@ -1,6 +1,5 @@
-use super::rgb::Rgb;
 use super::hsv::Hsv;
-
+use super::rgb::Rgb;
 
 pub fn hsv_from_rgb(rgb: &Rgb) -> Hsv {
     let r = rgb.r as f64 / 255.0;
@@ -18,11 +17,7 @@ pub fn hsv_from_rgb(rgb: &Rgb) -> Hsv {
     } else {
         60.0 * (((r - g) / delta) + 4.0)
     };
-    let s = if max == 0.0 {
-        0.0
-    } else {
-        delta / max
-    };
+    let s = if max == 0.0 { 0.0 } else { delta / max };
     let v = max;
     Hsv {
         h,

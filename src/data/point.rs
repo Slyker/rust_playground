@@ -4,7 +4,7 @@ pub struct Point {
     pub x: u32,
     pub y: u32,
 }
-
+#[allow(dead_code)]
 impl Point {
     pub fn new(x: u32, y: u32) -> Self {
         Self { x, y }
@@ -24,17 +24,15 @@ impl Point {
         self.x <= point.x || self.y <= point.y // min_x or min_y
     }
 
-    
     pub fn is_under(&self, point: &Point) -> bool {
         self.y >= point.y // max_y
     }
-    
+
     pub fn is_above(&self, point: &Point) -> bool {
         self.y <= point.y // min_y
     }
 
     pub fn is_inside(&self, point_min: &Point, point_max: &Point) -> bool {
-       !self.is_after(point_max) && !self.is_before(point_min)
+        !self.is_after(point_max) && !self.is_before(point_min)
     }
-
 }

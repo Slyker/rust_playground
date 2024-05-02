@@ -1,20 +1,26 @@
 use image::ImageBuffer;
-use rayon::iter::{ ParallelBridge, ParallelIterator };
+use rayon::iter::{ParallelBridge, ParallelIterator};
 
 use crate::data::point::Point;
 
-use self::{ color::{ rgb::Rgb, Color }, pixel::{ Pixel, PixelVec, _PixelVec } };
+use self::{
+    color::{rgb::Rgb, Color},
+    pixel::PixelVec,
+};
 
-pub mod pixel;
 pub mod color;
+pub mod pixel;
+#[allow(dead_code)]
 pub enum LoopResult {
     Continue(Axis),
     Break(Axis),
 }
+#[allow(dead_code)]
 pub enum Axis {
     X,
     Y,
 }
+#[allow(dead_code)]
 #[derive(Debug, PartialEq, Clone)]
 pub enum ImageZone {
     Full,
@@ -29,10 +35,7 @@ impl ImageAnalyzer {
         Self { image }
     }
 
-    pub fn par_pixel_detectv1<F>(&self, mut callback: F) -> _PixelVec
-        where F: FnMut(Color, Point) -> Option<LoopResult> + Send + 'static
-    {
-        
+    pub fn par_pixel_detectv1(&self) -> PixelVec {
         let (snd, rcv) = std::sync::mpsc::channel();
         let image = self.image.clone();
         let _ = std::thread::spawn(move || {
@@ -45,26 +48,27 @@ impl ImageAnalyzer {
             image
                 .enumerate_rows()
                 .par_bridge()
-                .for_each(move |(y, row)| {
+                .for_each(move |(_, row)| {
                     for (_, (x, y, pixel)) in row.enumerate() {
                         let rgb = Rgb::from(pixel.0);
                         let _ = snd.send((rgb, Point { x, y }));
                     }
                 });
         });
-        let mut rgb_pixels: _PixelVec = _PixelVec::new();
+        let mut rgb_pixels: PixelVec = PixelVec::new();
         while let Ok((rgb, point)) = rcv.recv() {
             let rgb = Color::Rgb(rgb);
             rgb_pixels.push((rgb, point));
         }
-        
+
         rgb_pixels
     }
 
     pub fn pixel_detectv1<F>(&self, mut callback: F)
-        where F: FnMut(Color, Point) -> Option<LoopResult>
+    where
+        F: FnMut(Color, Point) -> Option<LoopResult>,
     {
-        'outer: for (y, row) in self.image.enumerate_rows() {
+        'outer: for (_, row) in self.image.enumerate_rows() {
             for (_, (x, y, pixel)) in row.enumerate() {
                 let rgb = Rgb::from(pixel.0);
                 let loop_result = callback(Color::Rgb(rgb), Point { x, y });
@@ -89,13 +93,18 @@ impl ImageAnalyzer {
     }
 
     pub fn pixel_detectv2<F>(&self, zone: ImageZone, mut callback: F)
-        where F: FnMut(Color, Point) -> Option<LoopResult>
+    where
+        F: FnMut(Color, Point) -> Option<LoopResult>,
     {
         let width = {
             match zone {
                 ImageZone::Full => self.image.width(),
                 ImageZone::Partial(ref start, ref end) => {
-                    if start.x > end.x || start.y > end.y || end.x > self.image.width() || end.y > self.image.height() {
+                    if start.x > end.x
+                        || start.y > end.y
+                        || end.x > self.image.width()
+                        || end.y > self.image.height()
+                    {
                         panic!("Invalid zone");
                     }
                     end.x - start.x
@@ -106,7 +115,11 @@ impl ImageAnalyzer {
             match zone {
                 ImageZone::Full => self.image.height(),
                 ImageZone::Partial(ref start, ref end) => {
-                    if start.x > end.x || start.y > end.y || end.x > self.image.width() || end.y > self.image.height() {
+                    if start.x > end.x
+                        || start.y > end.y
+                        || end.x > self.image.width()
+                        || end.y > self.image.height()
+                    {
                         panic!("Invalid zone");
                     }
                     end.y - start.y
@@ -150,7 +163,7 @@ impl ImageAnalyzer {
             }
         }
     }
-
+    #[allow(dead_code)]
     pub fn batch_zones(&self, zones: Vec<ImageZone>) -> Vec<ImageZone> {
         // merge zones that have the exact same zone
         let mut zones_result = Vec::new();
@@ -162,9 +175,10 @@ impl ImageAnalyzer {
         }
         zones_result
     }
-
+    #[allow(dead_code)]
     pub fn detect_zones<F>(&self, zones: Vec<ImageZone>, mut callback: F)
-        where F: FnMut(Color, Point) -> Option<LoopResult>
+    where
+        F: FnMut(Color, Point) -> Option<LoopResult>,
     {
         for zone in zones {
             self.pixel_detectv2(zone, &mut callback);

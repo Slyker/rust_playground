@@ -1,5 +1,5 @@
-use super::rgb::Rgb;
 use super::hsv::Hsv;
+use super::rgb::Rgb;
 
 use super::conversion::*;
 /// From Rgb to Hsv conversion

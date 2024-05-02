@@ -1,4 +1,5 @@
-pub fn bench_closure<F>(name: &str, mut closure: F) -> std::time::Duration
+#[allow(dead_code)]
+pub fn bench_closure<F>(mut closure: F) -> std::time::Duration
 where
     F: FnMut(),
 {
@@ -11,16 +12,18 @@ pub struct Benchmark {
     iterations: u32,
     name: String,
     results: Vec<std::time::Duration>,
-    average: Option<std::time::Duration>,    
+    average: Option<std::time::Duration>,
+    print_result: bool,
 }
 
 impl Benchmark {
-    pub fn new(iterations: u32, name: &str) -> Self {
+    pub fn new(iterations: u32, name: &str, print: bool) -> Self {
         Self {
             iterations,
             name: name.to_string(),
             results: Vec::new(),
             average: None,
+            print_result: print,
         }
     }
 
@@ -32,7 +35,7 @@ impl Benchmark {
         for i in 0..self.iterations {
             let start = std::time::Instant::now();
             closure(i);
-            
+
             self.results.push(start.elapsed());
         }
         self.average = Some(
@@ -41,42 +44,16 @@ impl Benchmark {
                 .fold(std::time::Duration::new(0, 0), |acc, &x| acc + x)
                 / self.iterations,
         );
+        if self.print_result {
+            self.print();
+        }
         println!("Benchmark done: {}", self.name);
     }
 
-
-
-    /// Return results with the percentage difference from the average and fastest time
-    pub fn to_diff_percent(&self) -> Vec<(std::time::Duration, f64, f64)> {
-        let average = self.average.unwrap();
-        let fastest = self.results.iter().min().unwrap();
-        self.results
-            .iter()
-            .map(|x| {
-                let diff = x.checked_sub(average).unwrap_or(std::time::Duration::new(0, 0));
-                let diff_percent = diff.as_secs_f64() / average.as_secs_f64() * 100.0;
-                let diff_percent_fastest = diff.as_secs_f64() / fastest.as_secs_f64() * 100.0;
-                (*x, diff_percent, diff_percent_fastest)
-            })
-            .collect()
-    }
-
-    pub fn diff_percent_to_string(&self) -> String {
-        let results = self.to_diff_percent();
-        results
-            .iter()
-            .map(|(x, y, z)| format!("{:?} avg:{:.5}% fastest:{:.5}%", x, y,z))
-            .collect::<Vec<String>>()
-            .join("\n")
-    }
-
     pub fn print(&self) {
-        //println!("Benchmark: {}", self.name);
         println!("  Slowest: {:?}", self.results.iter().max().unwrap());
         println!("  Fastest: {:?}", self.results.iter().min().unwrap());
         println!("  Iterations: {}", self.iterations);
-        //println!("  Results: {:?}", self.results);
-        //println!("  Results:\n {}", self.diff_percent_to_string());
         println!("  Average: {:?}", self.average);
     }
 }
@@ -87,7 +64,7 @@ mod tests {
 
     #[test]
     fn test_bench_closure() {
-        let duration = bench_closure("test", || {
+        let duration = bench_closure(|| {
             std::thread::sleep(std::time::Duration::from_secs(1));
         });
         assert_eq!(duration.as_secs(), 1);
@@ -95,20 +72,19 @@ mod tests {
 
     #[test]
     fn test_benchmark() {
-        let mut benchmark = Benchmark::new(10, "test");
-        benchmark.run(|i| {
+        let mut benchmark = Benchmark::new(10, "test", true);
+        benchmark.run(|_| {
             std::thread::sleep(std::time::Duration::from_secs(1));
         });
-        benchmark.print();
     }
     #[test]
     fn test_benchmark_borrow() {
-        let mut benchmark = Benchmark::new(10, "test");
+        let mut benchmark = Benchmark::new(10, "test", true);
         let mut hello = vec!["world", "just", "testing"];
         let mut world = vec!["rust", "is", "cool"];
         println!("Hello: {:?}", hello);
         println!("World: {:?}", world);
-        let mut closure = |i| {
+        let mut closure = |_| {
             std::thread::sleep(std::time::Duration::from_secs(1));
             // transfer value from world to hello we add one element and remove it
             let elem = world.pop();
@@ -117,7 +93,6 @@ mod tests {
             }
         };
         benchmark.run(&mut closure);
-        benchmark.print();
         println!("Hello: {:?}", hello);
         println!("World: {:?}", world);
     }

@@ -1,4 +1,4 @@
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 
 use super::rgb::Rgb;
 
@@ -28,7 +28,7 @@ impl Hsv {
         let valid = Hsv::valid_bounds(values);
         assert!(valid.is_ok(), "{}", valid.unwrap_err());
     }
-
+    #[allow(dead_code)]
     pub fn diff(&self, other: &Hsv) -> Hsv {
         Hsv {
             h: (self.h - other.h).abs(),
@@ -37,16 +37,23 @@ impl Hsv {
             a: (self.a - other.a).abs(),
         }
     }
-
+    #[allow(dead_code)]
     pub fn compare(&self, other: &Hsv, tolerance: Hsv) -> bool {
         let diff = self.diff(other);
-        diff.h <= tolerance.h && diff.s <= tolerance.s && diff.v <= tolerance.v && diff.a <= tolerance.a
+        diff.h <= tolerance.h
+            && diff.s <= tolerance.s
+            && diff.v <= tolerance.v
+            && diff.a <= tolerance.a
     }
-
+    #[allow(dead_code)]
     pub fn compare_from_rgb(&self, other: &Rgb, tolerance: Hsv) -> bool {
         let diff = self.diff(&Hsv::from(other));
-        diff.h <= tolerance.h && diff.s <= tolerance.s && diff.v <= tolerance.v && diff.a <= tolerance.a
+        diff.h <= tolerance.h
+            && diff.s <= tolerance.s
+            && diff.v <= tolerance.v
+            && diff.a <= tolerance.a
     }
+    #[allow(dead_code)]
     pub fn compare_to_rgb(&self, other: &Rgb, tolerance: Rgb) -> bool {
         let rgb = Rgb::from(self);
         rgb.compare(other, tolerance)
@@ -88,7 +95,7 @@ mod tests {
         // Valid
         let _ = Hsv::from([0.0, 0.0, 0.0, 1.0]);
         let _ = Hsv::from([360.0, 1.0, 1.0, 1.0]);
-        let _ = Hsv::from([180.0, 0.5, 0.5, 1.0]);       
+        let _ = Hsv::from([180.0, 0.5, 0.5, 1.0]);
     }
 
     #[test]

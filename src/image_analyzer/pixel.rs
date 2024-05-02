@@ -32,4 +32,8 @@ impl PixelVec {
             points: vec![point],
         });
     }
+    #[allow(dead_code)]
+    pub fn get_by_color(&self, color: &Color) -> Option<&Pixel> {
+        self.pixels.iter().find(|pixel| &pixel.color == color)
+    }
 }

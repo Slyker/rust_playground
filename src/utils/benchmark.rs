@@ -32,6 +32,7 @@ impl Benchmark {
         F: FnMut(u32),
     {
         println!("Running benchmark: {}(x{})", self.name, self.iterations);
+        let start = std::time::Instant::now();
         for i in 0..self.iterations {
             let start = std::time::Instant::now();
             closure(i);
@@ -46,7 +47,7 @@ impl Benchmark {
         if self.print_result {
             self.print();
         }
-        println!("Benchmark done: {}", self.name);
+        println!("Benchmark done: {} tooks {:?}", self.name, start.elapsed());
     }
 
     pub fn print(&self) {

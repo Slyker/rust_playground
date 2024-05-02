@@ -50,48 +50,26 @@ impl ImageAnalyzer {
     where
         F: FnMut(Color, Point) -> Option<LoopResult>,
     {
-        let width = {
+        let (width, height, start_x, start_y) = {
+            let width = self.image.width();
+            let height = self.image.height();
             match zone {
-                ImageZone::Full => self.image.width(),
-                ImageZone::Partial(ref start, ref end) => {
-                    if start.x > end.x
-                        || start.y > end.y
-                        || end.x > self.image.width()
-                        || end.y > self.image.height()
-                    {
-                        panic!("Invalid zone");
-                    }
-                    end.x - start.x
+            ImageZone::Full => (width, height, 0, 0),
+            ImageZone::Partial(ref start, ref end) => {
+                if start.x > end.x
+                || start.y > end.y
+                || end.x > width
+                || end.y > height
+                {
+                panic!("Invalid zone");
+                } else if start.x == end.x || start.y == end.y {
+                panic!("Invalid zone");
                 }
+                (end.x - start.x, end.y - start.y, start.x, start.y)
+            }
             }
         };
-        let height = {
-            match zone {
-                ImageZone::Full => self.image.height(),
-                ImageZone::Partial(ref start, ref end) => {
-                    if start.x > end.x
-                        || start.y > end.y
-                        || end.x > self.image.width()
-                        || end.y > self.image.height()
-                    {
-                        panic!("Invalid zone");
-                    }
-                    end.y - start.y
-                }
-            }
-        };
-        let start_y = {
-            match zone {
-                ImageZone::Full => 0,
-                ImageZone::Partial(ref start, _) => start.y,
-            }
-        };
-        let start_x = {
-            match zone {
-                ImageZone::Full => 0,
-                ImageZone::Partial(ref start, _) => start.x,
-            }
-        };
+      
 
         'outer: for y in start_y..height {
             for x in start_x..width {
